@@ -6,17 +6,17 @@ from logging.handlers import RotatingFileHandler
 
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
-API_ID = int(os.environ.get("API_ID", ""))
-API_HASH = os.environ.get("API_HASH", "")
+API_ID = int(os.environ.get("API_ID", "22432833"))
+API_HASH = os.environ.get("API_HASH", "897f1c440892cfc46c7e222dfb37d015")
 
 
-OWNER_ID = int(os.environ.get("OWNER_ID", ""))
-DB_URL = os.environ.get("DB_URL", "")
-DB_NAME = os.environ.get("DB_NAME", "madflixbotz")
+OWNER_ID = int(os.environ.get("OWNER_ID", "7592041488"))
+DB_URL = os.environ.get("DB_URL", "mongodb+srv://enobot12345:4wEyfM0FvZxNhAKi@cluster0.a4rj3dj.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+DB_NAME = os.environ.get("DB_NAME", "Lakki")
 
 
-CHANNEL_ID = int(os.environ.get("CHANNEL_ID", ""))
-FORCE_SUB_CHANNEL = int(os.environ.get("FORCE_SUB_CHANNEL", "0"))
+CHANNEL_ID = int(os.environ.get("CHANNEL_ID", "-1002183731645"))
+FORCE_SUB_CHANNEL = int(os.environ.get("FORCE_SUB_CHANNEL", "-1002326767461"))
 
 
 FILE_AUTO_DELETE = int(os.getenv("FILE_AUTO_DELETE", "600")) # auto delete in seconds
@@ -28,8 +28,8 @@ TG_BOT_WORKERS = int(os.environ.get("TG_BOT_WORKERS", "4"))
 
 
 try:
-    ADMINS=[6848088376]
-    for x in (os.environ.get("ADMINS", "6848088376").split()):
+    ADMINS=[7592041488]
+    for x in (os.environ.get("ADMINS", "7592041488").split()):
         ADMINS.append(int(x))
 except ValueError:
         raise Exception("Your Admins list does not contain valid integers.")
@@ -67,7 +67,7 @@ FORCE_MSG = os.environ.get("FORCE_SUB_MESSAGE", "Hello {mention}\n\n<b>You Need 
 
 
 ADMINS.append(OWNER_ID)
-ADMINS.append(6848088376)
+ADMINS.append(7592041488)
 
 LOG_FILE_NAME = "filesharingbot.txt"
 
