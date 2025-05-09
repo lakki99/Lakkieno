@@ -70,7 +70,7 @@ async def start_command(client: Client, message: Message):
                     i -= 1
                     if i < end:
                         break
-        elif len(argument) == 2:
+        elif len(argument) == 3:
             try:
                 ids = [int(int(argument[1]) / abs(client.db_channel.id))]
             except:
