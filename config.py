@@ -9,6 +9,13 @@ BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
 API_ID = int(os.environ.get("API_ID", "22432833"))
 API_HASH = os.environ.get("API_HASH", "897f1c440892cfc46c7e222dfb37d015")
 
+from os import environ
+
+API = environ.get("API", "4574770a1b3e06b54b609f961e87efe837ea31cf") # shortlink api
+URL = environ.get("URL", "arolinks.com") # shortlink domain without https://
+VERIFY_TUTORIAL = environ.get("VERIFY_TUTORIAL", "https://t.me/Sk_entertains") # how to open link 
+BOT_USERNAME = environ.get("BOT_USERNAME", "ENO_1bot") # bot username without @
+VERIFY = environ.get("VERIFY", "True") # set True Or False and make sure spelling is correct and first letter capital.
 
 OWNER_ID = int(os.environ.get("OWNER_ID", "7592041488"))
 DB_URL = os.environ.get("DB_URL", "mongodb+srv://enobot12345:4wEyfM0FvZxNhAKi@cluster0.a4rj3dj.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
