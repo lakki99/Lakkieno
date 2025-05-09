@@ -1,4 +1,5 @@
-import os
+from os
+from os import environ
 import logging
 from logging.handlers import RotatingFileHandler
 
@@ -9,7 +10,6 @@ BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
 API_ID = int(os.environ.get("API_ID", "22432833"))
 API_HASH = os.environ.get("API_HASH", "897f1c440892cfc46c7e222dfb37d015")
 
-from os import environ
 
 API = environ.get("API", "4574770a1b3e06b54b609f961e87efe837ea31cf") # shortlink api
 URL = environ.get("URL", "arolinks.com") # shortlink domain without https://
