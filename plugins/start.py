@@ -18,41 +18,144 @@ file_auto_delete = humanize.naturaldelta(jishudeveloper)
 
 
 @Bot.on_message(filters.command('start') & filters.private & subscribed)
-async def start_command(client: Client, message: Message):       
-    id = message.from_user.id
-    if not await present_user(id):
-        try:
-            await add_user(id)
-        except:
-            pass
-    text = message.text
-    if len(text)>7:
-        try:
-            base64_string = text.split(" ", 1)[1]
-        except:
-            return
-        string = await decode(base64_string)
-        argument = string.split("-")
-        if len(argument) == 3:
-            try:
-                start = int(int(argument[1]) / abs(client.db_channel.id))
-                end = int(int(argument[2]) / abs(client.db_channel.id))
-            except:
-                return 
-                data = message.command[1]
-    if data.split("-", 1)[0] == "verify": # set if or elif it depend on your code
-        userid = data.split("-", 2)[1]
-        token = data.split("-", 3)[2]
-        if str(message.from_user.id) != str(userid):
-            return await message.reply_text(
-                text="<b>Invalid link or Expired link !</b>",
-                protect_content=True
-            )
-        is_valid = await check_token(client, userid, token)
-        if is_valid == True:
-            await message.reply_text(
-                text=f"<b>Hey {message.from_user.mention}, You are successfully verified !\nNow you have unlimited access for all files till today midnight.</b>",
-                protect_content=True
+async def start_command(client: Client, message: Message):       
+    id = message.from_user.id
+    if not await present_user(id):
+        try:
+            await add_user(id)
+        except:
+            pass
+
+    text = message.text
+    if len(text) > 7:
+        try:
+            base64_string = text.split(" ", 1)[1]
+            string = await decode(base64_string)
+            argument = string.split("-")
+        except:
+            return
+
+        # Check for verification command
+        if argument[0] == "verify" and len(argument) == 3:
+            userid = argument[1]
+            token = argument[2]
+            if str(message.from_user.id) != str(userid):
+                return await message.reply_text(
+                    text="<b>Invalid link or Expired link !</b>",
+                    protect_content=True
+                )
+            is_valid = await check_token(client, userid, token)
+            if is_valid:
+                await message.reply_text(
+                    text=f"<b>Hey {message.from_user.mention}, You are successfully verified!\nNow you have unlimited access for all files till today midnight.</b>",
+                    protect_content=True
+                )
+                await verify_user(client, userid, token)
+            else:
+                return await message.reply_text(
+                    text="<b>Invalid link or Expired link !</b>",
+                    protect_content=True
+                )
+            return
+
+        # File delivery logic
+        ids = []
+        if len(argument) == 3:
+            try:
+                start = int(int(argument[1]) / abs(client.db_channel.id))
+                end = int(int(argument[2]) / abs(client.db_channel.id))
+                ids = list(range(start, end + 1)) if start <= end else list(range(start, end - 1, -1))
+            except:
+                return
+        elif len(argument) == 2:
+            try:
+                ids = [int(int(argument[1]) / abs(client.db_channel.id))]
+            except:
+                return
+        else:
+            return
+
+        temp_msg = await message.reply("Please Wait...")
+
+        if not await check_verification(client, message.from_user.id) and VERIFY:
+            btn = [
+                [InlineKeyboardButton("Verify", url=await get_token(client, message.from_user.id, f"https://telegram.me/{BOT_USERNAME}?start="))],
+                [InlineKeyboardButton("How To Open Link & Verify", url=VERIFY_TUTORIAL)]
+            ]
+            await message.reply_text(
+                text="<b>You are not verified!\nKindly verify to continue.</b>",
+                protect_content=True,
+                reply_markup=InlineKeyboardMarkup(btn)
+            )
+            return
+
+        try:
+            messages = await get_messages(client, ids)
+        except:
+            await temp_msg.edit("Something went wrong while fetching messages.")
+            return
+
+        await temp_msg.delete()
+
+        madflix_msgs = []
+
+        for msg in messages:
+            if bool(CUSTOM_CAPTION) and msg.document:
+                caption = CUSTOM_CAPTION.format(
+                    previouscaption=msg.caption.html if msg.caption else "",
+                    filename=msg.document.file_name
+                )
+            else:
+                caption = msg.caption.html if msg.caption else ""
+
+            reply_markup = msg.reply_markup if DISABLE_CHANNEL_BUTTON else None
+
+            try:
+                madflix_msg = await msg.copy(
+                    chat_id=message.from_user.id,
+                    caption=caption,
+                    parse_mode=ParseMode.HTML,
+                    reply_markup=reply_markup,
+                    protect_content=PROTECT_CONTENT
+                )
+                madflix_msgs.append(madflix_msg)
+            except FloodWait as e:
+                await asyncio.sleep(e.x)
+                madflix_msg = await msg.copy(
+                    chat_id=message.from_user.id,
+                    caption=caption,
+                    parse_mode=ParseMode.HTML,
+                    reply_markup=reply_markup,
+                    protect_content=PROTECT_CONTENT
+                )
+                madflix_msgs.append(madflix_msg)
+            except:
+                pass
+
+        k = await client.send_message(
+            chat_id=message.from_user.id,
+            text=f"<b>❗️ <u>IMPORTANT</u> ❗️</b>\n\nThis Video / File Will Be Deleted In {file_auto_delete} (Due To Copyright Issues).\n\n📌 Please Forward This Video / File To Somewhere Else And Start Downloading There.")
+
+        asyncio.create_task(delete_files(madflix_msgs, client, k))
+        return
+
+    # Default start message when no arguments
+    reply_markup = InlineKeyboardMarkup([
+        [InlineKeyboardButton("😊 About Me", callback_data="about"), InlineKeyboardButton("🔒 Close", callback_data="close")]
+    ])
+    await message.reply_text(
+        text=START_MSG.format(
+            first=message.from_user.first_name,
+            last=message.from_user.last_name,
+            username='@' + message.from_user.username if message.from_user.username else None,
+            mention=message.from_user.mention,
+            id=message.from_user.id
+        ),
+        reply_markup=reply_markup,
+        disable_web_page_preview=True,
+        quote=True
+    )
+
             )
             await verify_user(client, userid, token)
         else:
